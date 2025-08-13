@@ -83,7 +83,7 @@ class Thermal(PddfThermal):
             cmdstatus, temperature = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
         else:
             cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
-
+            
         if cmdstatus != 0:
             print("Error reading reg {}".format(hex(reg_offset)))
             return 0
@@ -130,7 +130,6 @@ class Thermal(PddfThermal):
         if self.is_psu_thermal:
             return notimplementederror
         else:
-
             cmdstatus = 0
             temperature = ""
             if self.isDockerEnv():
