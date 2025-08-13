@@ -25,6 +25,11 @@ class Fan(PddfFan):
         # idx is 0-based
         PddfFan.__init__(self, tray_idx, fan_idx, pddf_data, pddf_plugin_data, is_psu_fan, psu_index)
 
+    def isDockerEnv(self):
+        num_docker = open('/proc/self/cgroup', 'r').read().count(":/docker")
+        if num_docker > 0:
+            return True
+
     # Provide the functions/variables below for which implementation is to be overwritten
     # Since psu_fan airflow direction cant be read from sysfs, it is fixed as 'F2B' or 'intake'
     def get_model(self):
@@ -131,14 +136,26 @@ class Fan(PddfFan):
         Returns:
             An integer, speed of fan in RPM
         """
+        cmdstatus = 0
+        rpm_0 = 0
+        rpm_1 = 0
 
-        cmdstatus, rpm_0 = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+        if self.isDockerEnv():
+            cmdstatus, rpm_0 = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+        else:
+            cmdstatus, rpm_0 = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+
         if cmdstatus != 0:
             print("Error reading reg {}".format(hex(reg_offset)))
             return 0
 
         reg_offset = reg_offset+1
-        cmdstatus, rpm_1 = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+
+        if self.isDockerEnv():
+            cmdstatus, rpm_1 = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+        else:
+            cmdstatus, rpm_1 = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+
         if cmdstatus != 0:
             print("Error reading reg {}".format(hex(reg_offset)))
             return 0

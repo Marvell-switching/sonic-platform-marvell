@@ -26,6 +26,11 @@ class Thermal(PddfThermal):
         self.minimum_thermal = self.get_temperature()
         self.maximum_thermal = self.get_temperature()
 
+    def isDockerEnv(self):
+        num_docker = open('/proc/self/cgroup', 'r').read().count(":/docker")
+        if num_docker > 0:
+            return True
+
     def get_presence(self):
         """
         Retrieves the presence of the thermal
@@ -72,7 +77,13 @@ class Thermal(PddfThermal):
             A float, temperature value in celcius
         """
 
-        cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+        cmdstatus = 0
+        temperature = ""
+        if self.isDockerEnv():
+            cmdstatus, temperature = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+        else:
+            cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(reg_offset)])
+
         if cmdstatus != 0:
             print("Error reading reg {}".format(hex(reg_offset)))
             return 0
@@ -119,7 +130,14 @@ class Thermal(PddfThermal):
         if self.is_psu_thermal:
             return notimplementederror
         else:
-            cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+
+            cmdstatus = 0
+            temperature = ""
+            if self.isDockerEnv():
+                cmdstatus, temperature = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+            else:
+                cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+
             if cmdstatus != 0:
                 print("Error reading reg {}".format(hex(reg_offset)))
                 return 0
@@ -137,7 +155,13 @@ class Thermal(PddfThermal):
         if self.is_psu_thermal:
             return notimplementederror
         else:
-            cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+            cmdstatus = 0
+            temperature = ""
+            if self.isDockerEnv():
+                cmdstatus, temperature = getstatusoutput_noshell(['i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+            else:
+                cmdstatus, temperature = getstatusoutput_noshell(['sudo', 'i2cget', '-f', '-y', str(FPGA_I2C_BUS_NUM), str(FPGA_DEV_ADDR), str(0x50)])
+
             if cmdstatus != 0:
                 print("Error reading reg {}".format(hex(reg_offset)))
                 return 0
