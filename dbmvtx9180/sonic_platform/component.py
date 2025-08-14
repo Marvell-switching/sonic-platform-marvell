@@ -32,9 +32,13 @@ class Component(ComponentBase):
         self.name = self.get_name()
 
     def isDockerEnv(self):
-        num_docker = open('/proc/self/cgroup', 'r').read().count(":/docker")
+        num_docker = 0
+        with open('/proc/self/cgroup', 'r') as f:
+            num_docker = f.read().count(":/docker")
         if num_docker > 0:
             return True
+        else:
+            return False
 
     def _run_command(self, command):
         # Run bash command and print output to stdout

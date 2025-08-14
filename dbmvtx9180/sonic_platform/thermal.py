@@ -27,9 +27,13 @@ class Thermal(PddfThermal):
         self.maximum_thermal = self.get_temperature()
 
     def isDockerEnv(self):
-        num_docker = open('/proc/self/cgroup', 'r').read().count(":/docker")
+        num_docker = 0
+        with open('/proc/self/cgroup', 'r') as f:
+            num_docker = f.read().count(":/docker")
         if num_docker > 0:
             return True
+        else:
+            return False
 
     def get_presence(self):
         """
