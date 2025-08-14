@@ -26,9 +26,13 @@ class Fan(PddfFan):
         PddfFan.__init__(self, tray_idx, fan_idx, pddf_data, pddf_plugin_data, is_psu_fan, psu_index)
 
     def isDockerEnv(self):
-        num_docker = open('/proc/self/cgroup', 'r').read().count(":/docker")
+        num_docker = 0
+        with open('/proc/self/cgroup', 'r') as f:
+            num_docker = f.read().count(":/docker")
         if num_docker > 0:
             return True
+        else:
+            return False
 
     # Provide the functions/variables below for which implementation is to be overwritten
     # Since psu_fan airflow direction cant be read from sysfs, it is fixed as 'F2B' or 'intake'
