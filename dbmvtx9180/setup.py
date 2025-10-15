@@ -14,7 +14,7 @@ setup(
    packages=[
        'sonic_platform'
    ],
-   package_dir={'sonic_platform': 'dbmvtx9180/sonic_platform'},
+   package_dir={'sonic_platform': 'sonic_platform'},
    classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Plugins',
